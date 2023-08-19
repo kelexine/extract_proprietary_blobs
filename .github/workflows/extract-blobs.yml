@@ -46,6 +46,15 @@ jobs:
       with:
         swap-size-gb: 12
 
+    - name: Prepare GithubCLI
+      run: |
+        type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
+        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+        && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+        && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+        && sudo apt update \
+        && sudo apt install gh -y
+
     - name: Shorten Variables
       run: |
         echo "FDR=${{ github.event.inputs.FIRMWARE_DUMP_REPO }}" >> $GITHUB_ENV
@@ -86,13 +95,9 @@ jobs:
     - name: Push to Github as Repository
       run: |
         cd workspace/android/vendor/${{ env.DVN }}/${{ env.DCN }}
+        export GITHUB_TOKEN=${{ secrets.TG_TOKEN }}
         git init
-        git remote add origin https://github.com/${GITHUB_ACTOR}/${{ env.TR }}.git
-        git branch -M main
+        git branch -M main-${{ env.DCN }}
         git add .
-        git config --global user.name "${GITHUB_ACTOR}"
-        git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
-        git commit -s -m "${{ env.DCN }}: Initial proprietary/vendor blob tree."
-        curl -s -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"name": "'"${{ env.TR }}"'", "description": "'"Proprietary Blobs"'"}' "https://api.github.com/user/repos" >/dev/null 2>&1
-        git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_ACTOR}/${{ env.TR }}.git main
-       
+        git commit -s -m "${{ env.DCN }}: proprietary: initial vendor tree"
+        gh repo create ${{ env.TR }} --public --description="Proprietary Blobs Tree" --source=. --remote=origin --push
