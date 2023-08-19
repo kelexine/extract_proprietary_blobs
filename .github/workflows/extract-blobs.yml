@@ -1,0 +1,98 @@
+name: Extract Blobs
+
+on:
+  workflow_dispatch:
+    inputs:
+      FIRMWARE_DUMP_REPO:
+        description: 'Firmware Dump Repository URL'
+        required: true
+        default: ''
+      FIRMWARE_DUMP_BRANCH:
+        description: 'Firmware Dump Repository Branch'
+        required: true
+        default: ''
+      DEVICE_TREE_REPO:
+        description: 'Device Tree Repository URL'
+        required: true
+        default: ''
+      DEVICE_TREE_BRANCH:
+        description: 'Device Tree Repository Branch'
+        required: true
+        default: ''
+      DEVICE_CODENAME:
+        description: 'Device Codename'
+        required: true
+        default: ''
+      DEVICE_VENDORNAME:
+        description: 'Device Vendor Name'
+        required: true
+        default: ''
+
+jobs:
+  build:
+    name: Extract Blobs by ${{ github.actor }}
+    if: github.event.repository.owner.id == github.event.sender.id
+    runs-on: ubuntu-20.04
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+    steps:
+    - name: Check Out
+      uses: actions/checkout@v3
+
+    - name: Set Swap Space
+      uses: pierotofy/set-swap-space@master
+      with:
+        swap-size-gb: 12
+
+    - name: Shorten Variables
+      run: |
+        echo "FDR=${{ github.event.inputs.FIRMWARE_DUMP_REPO }}" >> $GITHUB_ENV
+        echo "FDB=${{ github.event.inputs.FIRMWARE_DUMP_BRANCH }}" >> $GITHUB_ENV
+        echo "DTR=${{ github.event.inputs.DEVICE_TREE_REPO }}" >> $GITHUB_ENV
+        echo "DTB=${{ github.event.inputs.DEVICE_TREE_BRANCH }}" >> $GITHUB_ENV
+        echo "DCN=${{ github.event.inputs.DEVICE_CODENAME }}" >> $GITHUB_ENV
+        echo "DVN=${{ github.event.inputs.DEVICE_VENDORNAME }}" >> $GITHUB_ENV
+        echo "TR=proprietary_tree_${{ github.event.inputs.DEVICE_VENDORNAME }}_${{ github.event.inputs.DEVICE_CODENAME }}" >> $GITHUB_ENV
+        
+    - name: Clone Firmware Dump
+      run: |
+        mkdir workspace && cd workspace
+        git clone ${{ env.FDR }} -b ${{ env.FDB }} ./firmware-dump
+
+    - name: Clone Device Tree
+      run: |
+        cd workspace
+        git clone ${{ env.DTR }} -b ${{ env.DTB }} ./android/device/${{ env.DVN }}/${{ env.DCN }}
+
+    - name: Clone LineageOS Tools and Utils
+      run: |
+        cd workspace
+        git clone https://github.com/LineageOS/android_tools_extract-utils -b lineage-20 ./android/tools/extract-utils
+        echo "Done cloning extract-utils."
+        git clone https://github.com/LineageOS/android_prebuilts_extract-tools -b lineage-20 ./android/prebuilts/extract-tools
+        echo "Done cloning extract-tools."
+
+    - name: Extracting Files from Dump
+      run: |
+        cd workspace
+        chmod a+x android/device/${{ env.DVN }}/${{ env.DCN }}/setup-makefiles.sh
+        cd android/device/${{ env.DVN }}/${{ env.DCN }}/
+        bash extract-files.sh ${GITHUB_WORKSPACE}/workspace/firmware-dump/
+        echo "Done extracting and making files."
+        echo "Pushing as repository now."
+        
+    - name: Push to Github as Repository
+      run: |
+        cd workspace/android/vendor/${{ env.DVN }}/${{ env.DCN }}
+        git init
+        git remote add origin https://github.com/${GITHUB_ACTOR}/${{ env.TR }}.git
+        git branch -M main
+        git add .
+        git config --global user.name "${GITHUB_ACTOR}"
+        git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
+        git commit -s -m "${{ env.DCN }}: Initial proprietary/vendor blob tree."
+        curl -s -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"name": "'"${{ env.TR }}"'", "description": "'"Proprietary Blobs"'"}' "https://api.github.com/user/repos" >/dev/null 2>&1
+        git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_ACTOR}/${{ env.TR }}.git main
+       
