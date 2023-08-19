@@ -27,8 +27,12 @@ on:
         description: 'Device Vendor Name'
         required: true
         default: ''
+      USER_NAME:
+        description: 'Name in Github Account'
+        required: true
+        default: 'Carlo Dee'
       USER_EMAIL:
-        description: 'E-mail used in Github Account'
+        description: 'E-mail in Github Account'
         required: true
         default: 'carlodee.official@proton.me'
 
@@ -67,30 +71,31 @@ jobs:
         echo "DTB=${{ github.event.inputs.DEVICE_TREE_BRANCH }}" >> $GITHUB_ENV
         echo "DCN=${{ github.event.inputs.DEVICE_CODENAME }}" >> $GITHUB_ENV
         echo "DVN=${{ github.event.inputs.DEVICE_VENDORNAME }}" >> $GITHUB_ENV
+        echo "UN=${{ github.event.inputs.USER_NAME }}" >> $GITHUB_ENV
         echo "UEM=${{ github.event.inputs.USER_EMAIL }}" >> $GITHUB_ENV
-        echo "TR=proprietary_tree_${{ github.event.inputs.DEVICE_VENDORNAME }}_${{ github.event.inputs.DEVICE_CODENAME }}" >> $GITHUB_ENV
+        echo "TR=android_proprietary_${{ env.DVN }}_${{ env.DCN }}" >> $GITHUB_ENV
 
     - name: Identity
       run: |
-        git config --global user.name "${GITHUB_ACTOR}"
+        git config --global user.name "${{ env.UN }}"
         git config --global user.email "${{ env.UEM }}"
         
     - name: Clone Firmware Dump
       run: |
         mkdir workspace && cd workspace
-        git clone ${{ env.FDR }} -b ${{ env.FDB }} ./firmware-dump
+        git clone --depth=1 ${{ env.FDR }} -b ${{ env.FDB }} ./firmware-dump
 
     - name: Clone Device Tree
       run: |
         cd workspace
-        git clone ${{ env.DTR }} -b ${{ env.DTB }} ./android/device/${{ env.DVN }}/${{ env.DCN }}
+        git clone --depth=1 ${{ env.DTR }} -b ${{ env.DTB }} ./android/device/${{ env.DVN }}/${{ env.DCN }}
 
     - name: Clone LineageOS Tools and Utils
       run: |
         cd workspace
-        git clone https://github.com/LineageOS/android_tools_extract-utils -b lineage-20.0 ./android/tools/extract-utils
+        git clone --depth=1 https://github.com/LineageOS/android_tools_extract-utils -b lineage-20.0 ./android/tools/extract-utils
         echo "Done cloning extract-utils."
-        git clone https://github.com/LineageOS/android_prebuilts_extract-tools -b lineage-20.0 ./android/prebuilts/extract-tools
+        git clone --depth=1  https://github.com/LineageOS/android_prebuilts_extract-tools -b lineage-20.0 ./android/prebuilts/extract-tools
         echo "Done cloning extract-tools."
 
     - name: Extracting Files from Dump
