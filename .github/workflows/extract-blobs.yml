@@ -42,7 +42,16 @@ jobs:
     if: github.event.repository.owner.id == github.event.sender.id
     runs-on: ubuntu-20.04
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.PAT }}
+      FDR: ${{ github.event.inputs.FIRMWARE_DUMP_REPO }}
+      FDB: ${{ github.event.inputs.FIRMWARE_DUMP_BRANCH }}
+      DTR: ${{ github.event.inputs.DEVICE_TREE_REPO }}
+      DTB: ${{ github.event.inputs.DEVICE_TREE_BRANCH }}
+      DCN: ${{ github.event.inputs.DEVICE_CODENAME }}
+      DVN: ${{ github.event.inputs.DEVICE_VENDORNAME }}
+      UN: ${{ github.event.inputs.USER_NAME }}
+      UEM: ${{ github.event.inputs.USER_EMAIL }}
+      TR: android_proprietary_${{ github.event.inputs.DEVICE_VENDORNAME }}_${{ github.event.inputs.DEVICE_CODENAME }}
     permissions:
       contents: write
     steps:
@@ -62,19 +71,7 @@ jobs:
         && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
         && sudo apt update \
         && sudo apt install gh -y
-
-    - name: Shorten Variables
-      run: |
-        echo "FDR=${{ github.event.inputs.FIRMWARE_DUMP_REPO }}" >> $GITHUB_ENV
-        echo "FDB=${{ github.event.inputs.FIRMWARE_DUMP_BRANCH }}" >> $GITHUB_ENV
-        echo "DTR=${{ github.event.inputs.DEVICE_TREE_REPO }}" >> $GITHUB_ENV
-        echo "DTB=${{ github.event.inputs.DEVICE_TREE_BRANCH }}" >> $GITHUB_ENV
-        echo "DCN=${{ github.event.inputs.DEVICE_CODENAME }}" >> $GITHUB_ENV
-        echo "DVN=${{ github.event.inputs.DEVICE_VENDORNAME }}" >> $GITHUB_ENV
-        echo "UN=${{ github.event.inputs.USER_NAME }}" >> $GITHUB_ENV
-        echo "UEM=${{ github.event.inputs.USER_EMAIL }}" >> $GITHUB_ENV
-        echo "TR=android_proprietary_${{ github.event.inputs.DEVICE_VENDORNAME }}_${{ github.event.inputs.DEVICE_CODENAME }}" >> $GITHUB_ENV
-
+        
     - name: Identity
       run: |
         git config --global user.name "${{ env.UN }}"
@@ -109,7 +106,6 @@ jobs:
         
     - name: Push to Github as Repository
       run: |
-        export GITHUB_TOKEN=${{ secrets.PAT }}
         cd workspace/android/vendor/${{ env.DVN }}/${{ env.DCN }}
         git init
         git branch -M main-${{ env.DCN }}
