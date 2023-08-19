@@ -27,6 +27,10 @@ on:
         description: 'Device Vendor Name'
         required: true
         default: ''
+      USER_EMAIL:
+        description: 'E-mail used in Github Account'
+        required: true
+        default: 'carlodee.official@proton.me'
 
 jobs:
   build:
@@ -63,7 +67,13 @@ jobs:
         echo "DTB=${{ github.event.inputs.DEVICE_TREE_BRANCH }}" >> $GITHUB_ENV
         echo "DCN=${{ github.event.inputs.DEVICE_CODENAME }}" >> $GITHUB_ENV
         echo "DVN=${{ github.event.inputs.DEVICE_VENDORNAME }}" >> $GITHUB_ENV
+        echo "UEM=${{ github.event.inputs.USER_EMAIL }}" >> $GITHUB_ENV
         echo "TR=proprietary_tree_${{ github.event.inputs.DEVICE_VENDORNAME }}_${{ github.event.inputs.DEVICE_CODENAME }}" >> $GITHUB_ENV
+
+    - name: Identity
+      run: |
+        git config --global user.name "${GITHUB_ACTOR}"
+        git config --global user.email "${{ env.UEM }}"
         
     - name: Clone Firmware Dump
       run: |
@@ -94,8 +104,8 @@ jobs:
         
     - name: Push to Github as Repository
       run: |
-        cd workspace/android/vendor/${{ env.DVN }}/${{ env.DCN }}
         export GITHUB_TOKEN=${{ secrets.PAT }}
+        cd workspace/android/vendor/${{ env.DVN }}/${{ env.DCN }}
         git init
         git branch -M main-${{ env.DCN }}
         git add .
