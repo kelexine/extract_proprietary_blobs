@@ -73,7 +73,7 @@ jobs:
         echo "DVN=${{ github.event.inputs.DEVICE_VENDORNAME }}" >> $GITHUB_ENV
         echo "UN=${{ github.event.inputs.USER_NAME }}" >> $GITHUB_ENV
         echo "UEM=${{ github.event.inputs.USER_EMAIL }}" >> $GITHUB_ENV
-        echo "TR=android_proprietary_${{ env.DVN }}_${{ env.DCN }}" >> $GITHUB_ENV
+        echo "TR=android_proprietary_${{ github.event.inputs.DEVICE_VENDORNAME }}_${{ github.event.inputs.DEVICE_CODENAME }}" >> $GITHUB_ENV
 
     - name: Identity
       run: |
