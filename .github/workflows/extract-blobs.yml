@@ -95,7 +95,7 @@ jobs:
     - name: Push to Github as Repository
       run: |
         cd workspace/android/vendor/${{ env.DVN }}/${{ env.DCN }}
-        export GITHUB_TOKEN=${{ secrets.TG_TOKEN }}
+        export GITHUB_TOKEN=${{ secrets.PAT }}
         git init
         git branch -M main-${{ env.DCN }}
         git add .
