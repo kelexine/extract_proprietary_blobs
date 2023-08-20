@@ -51,7 +51,7 @@ jobs:
       DVN: ${{ github.event.inputs.DEVICE_VENDORNAME }}
       UN: ${{ github.event.inputs.USER_NAME }}
       UEM: ${{ github.event.inputs.USER_EMAIL }}
-      TR: android_proprietary_${{ github.event.inputs.DEVICE_VENDORNAME }}_${{ github.event.inputs.DEVICE_CODENAME }}
+      TR: android_vendor_${{ github.event.inputs.DEVICE_VENDORNAME }}_${{ github.event.inputs.DEVICE_CODENAME }}
     permissions:
       contents: write
     steps:
@@ -111,4 +111,4 @@ jobs:
         git branch -M main-${{ env.DCN }}
         git add .
         git commit -s -m "${{ env.DCN }}: proprietary: initial vendor tree"
-        gh repo create ${{ env.TR }} --public --description="Proprietary Blobs Tree" --source=. --remote=origin --push
+        gh repo create ${{ env.TR }} --public --description="Vendor tree for ${{ env.DCN }}." --source=. --remote=origin --push
