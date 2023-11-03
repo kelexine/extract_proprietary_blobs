@@ -8,3 +8,4 @@
 
 ### Notes
 * You can get your `Personal Access Token` in account Settings > Developer settings > Personal acccess token.
+* Please make sure that you already trimmed your proprietary-files.txt files in your device tree, so you won't explicitly add blobs that weren't actually necessary.
