@@ -18,7 +18,7 @@ on:
       DEVICE_TREE_BRANCH:
         description: 'Device Tree Repository Branch'
         required: true
-        default: 'KG5j'
+        default: 'android-11'
       DEVICE_CODENAME:
         description: 'Device Codename'
         required: true
