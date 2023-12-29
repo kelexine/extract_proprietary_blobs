@@ -108,7 +108,7 @@ jobs:
       run: |
         cd workspace/android/vendor/${{ env.DVN }}/${{ env.DCN }}
         git init
-        git branch -M main-${{ env.DCN }}
+        git branch -M ${{ env.DCN }}
         git add .
         git commit -s -m "${{ env.DCN }}: proprietary: initial vendor tree"
         gh repo create ${{ env.TR }} --public --description="Vendor tree for ${{ env.DCN }}." --source=. --remote=origin --push
