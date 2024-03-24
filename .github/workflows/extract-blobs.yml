@@ -4,27 +4,27 @@ on:
   workflow_dispatch:
     inputs:
       FIRMWARE_DUMP_REPO:
-        description: 'Firmware Dump Repository URL'
+        description: 'Your Firmware Dump URL'
         required: true
         default: 'https://gitlab.com/kelexine/tecno-spark-8c-kg5j-rom-dump.git'
       FIRMWARE_DUMP_BRANCH:
-        description: 'Firmware Dump Repository Branch'
+        description: 'The Firmware Dump Branch'
         required: true
         default: 'main'
       DEVICE_TREE_REPO:
-        description: 'Device Tree Repository URL'
+        description: 'Your Android Device Tree URL'
         required: true
-        default: 'https://github.com/kelexine/android_device_tecno_KG5j'
+        default: 'https://github.com/kelexine/android_device_tecno_kelly'
       DEVICE_TREE_BRANCH:
-        description: 'Device Tree Repository Branch'
+        description: 'Your Android Device Tree Branch'
         required: true
-        default: 'android-11'
+        default: 'lineage-18.1'
       DEVICE_CODENAME:
-        description: 'Device Codename'
+        description: 'Your Device Codename'
         required: true
-        default: 'KG5j'
+        default: 'kelly'
       DEVICE_VENDORNAME:
-        description: 'Device Vendor Name'
+        description: 'Your Device OEM Name'
         required: true
         default: 'tecno'
       USER_NAME:
